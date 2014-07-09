@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title></title>
+    </head>
+    <body class="*">
+
+        <script src="js/kinetic-v5.0.1.min.js" type="text/javascript"></script>
+
+        <script src="js/common.js" type="text/javascript"></script>
+        <div class="main">                
+            <div id="container"></div>
+        </div>
+        <script defer="defer">
+            var id;
+            var radian = 0;
+            var context;
+            var curveLineWidth = 3, lineWidth = 1;
+            var context;
+            var graphCenter = {x: 300, y: 400};
+            // Positive X, Positive Y, Negative X, Negative Y
+            var maxUnits = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}];
+            var ellipse, coneWidth, coneHeight;
+            var maxPlots = 10, oneUnitPixel = 20, axisPlotBar = 10;
+            var stage = new Kinetic.Stage({container: 'container', width: 700, height: 700});
+            
+            // For Positive X axis
+            ellipseDistance = {x: graphCenter.x + (maxUnits[0].x * oneUnitPixel * 5), y: graphCenter.y + (maxUnits[0].y * oneUnitPixel * 5)};
+            coneWidth = oneUnitPixel / 2;
+            coneHeight = oneUnitPixel * 4;
+            generate_canvas(stage);
+            
+            /*/ For Positive Y axis
+            ellipseDistance = {x: graphCenter.x + (maxUnits[1].x * oneUnitPixel * 5), y: graphCenter.y + (maxUnits[1].y * oneUnitPixel * 5)};
+            coneWidth = oneUnitPixel * 4;
+            coneHeight = oneUnitPixel / 2;
+            generate_canvas(stage);
+            
+            // For Negative X axis
+            ellipseDistance = {x: graphCenter.x + (maxUnits[2].x * oneUnitPixel * 5), y: graphCenter.y + (maxUnits[2].y * oneUnitPixel * 5)};
+            coneWidth = oneUnitPixel / 2;
+            coneHeight = oneUnitPixel * 4;
+            generate_canvas(stage);
+            
+            // For Negative Y axis
+            ellipseDistance = {x: graphCenter.x + (maxUnits[3].x * oneUnitPixel * 5), y: graphCenter.y + (maxUnits[3].y * oneUnitPixel * 5)};
+            coneWidth = oneUnitPixel * 4;
+            coneHeight = oneUnitPixel / 2;
+            generate_canvas(stage);*/
+        </script>
+    </body>
+</html>
+
