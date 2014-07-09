@@ -1,5 +1,3 @@
-
-
 (function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -42,7 +40,13 @@ function generate_canvas(stage, rotationAxis) {
      start = {x: e.evt.clientX, y: e.evt.clientY},
      positionFrames();
      });*/
-
+    convertFormula('sqrt(x)');
+    var curvePoint = getCurveControlPoint();
+    var total = (oneUnitPixel * maxPlots);
+    var endPoint = {x: maxPlotValue / maxPlots, y: expression.evaluate({ x: maxPlotValue / maxPlots })}; 
+    coneHeight = endPoint.y * total;
+    controlPoints = {x: graphCenter.x + curvePoint.x, y: curvePoint.y};
+    
     ellipseLayer.add(draw_ellipse());
     stage.add(ellipseLayer);
     stage.add(layer);
@@ -51,10 +55,43 @@ function generate_canvas(stage, rotationAxis) {
     //positionFrames();
     drawAxis();
     animate();
+    plotRaw();
+    
+    // Draw Quadratic Curve For Both Ends
+    context.beginPath();
+    context.moveTo(graphCenter.x, graphCenter.y);
+    context.quadraticCurveTo(graphCenter.x + (curvePoint.x), graphCenter.y - (total * curvePoint.y) + oneUnitPixel + coneWidth, graphCenter.x + (total * endPoint.x), graphCenter.y - (total * endPoint.y));
+    context.setAttr('strokeStyle', 'red');
+    context.setAttr('lineWidth', 1);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(graphCenter.x, graphCenter.y);
+    context.quadraticCurveTo(graphCenter.x + (curvePoint.x), graphCenter.y + (total * curvePoint.y) - (oneUnitPixel + coneWidth), graphCenter.x + (total * endPoint.x), graphCenter.y + (total * endPoint.y));
+    context.setAttr('strokeStyle', 'red');
+    context.setAttr('lineWidth', 1);
+    context.stroke();
+}
+
+
+function getCurveControlPoint() {
+    return {x: (maxPlotValue / (maxPlots * 2)), y: expression.evaluate({x: (maxPlotValue / (maxPlots * 2))})};
+}
+
+function plotRaw() {
+    context.beginPath();
+    context.moveTo(graphCenter.x, graphCenter.y);
+    
+    for (var x = 0; x <= (maxPlotValue / maxPlots); x += 0.01) {
+        positions = {x: x, y: expression.evaluate({x: x})};
+        context.lineTo(graphCenter.x + (oneUnitPixel * positions.x * maxPlots), graphCenter.y - (maxPlots * oneUnitPixel * positions.y));
+        context.setAttr('strokeStyle', 'purple');
+        context.setAttr('lineWidth', 1);
+        context.stroke();
+    }
 }
 
 function drawAxis() {
-    
     var color = 'black';
 
     for (var i = 0; i < maxUnits.length; i++) {
@@ -73,7 +110,7 @@ function drawAxis() {
                 context.setAttr('strokeStyle', color);
                 context.setAttr('lineWidth', lineWidth);
                 context.stroke();
-                context.fillText(counter, graphCenter.x + (axisPlotBar / 2) + 3, graphCenter.y + (oneUnitPixel * counter * maxUnits[i].y));
+                context.fillText((counter) / 10, graphCenter.x + (axisPlotBar / 2) + 3, graphCenter.y + (oneUnitPixel * counter * maxUnits[i].y));
             }
         } else {
             for (var counter = 1; counter <= maxPlots; counter++) {
@@ -83,7 +120,7 @@ function drawAxis() {
                 context.setAttr('strokeStyle', color);
                 context.setAttr('lineWidth', lineWidth);
                 context.stroke();
-                context.fillText(counter, graphCenter.x + (oneUnitPixel * counter * maxUnits[i].x), graphCenter.y + (axisPlotBar / 2) + 8);
+                context.fillText((counter) / 10, graphCenter.x + (oneUnitPixel * counter * maxUnits[i].x), graphCenter.y + (axisPlotBar / 2) + 8);
             }
         }
     }
@@ -91,23 +128,14 @@ function drawAxis() {
     return true;
 }
 
-function plotPointsOnAxis() {
-
-}
-
 
 function generate_ellipse_points(xWidth, yWidth, rads) {
     return {x: ellipseDistance.x + (xWidth * Math.cos(Math.PI * rads)), y: ellipseDistance.y + (yWidth * Math.sin(Math.PI * rads))};
 }
 
-function drawLine() {
 
-}
-
-
-function convertFormula() {
-    var formula = 'sqrt(x)';
-
+function convertFormula(formula) {
+    expression = Parser.parse(formula);
 }
 
 function draw_ellipse() {
@@ -142,10 +170,20 @@ function draw_quadratic_curve(radian, context) {
     var position = {};
     var color = 'rgba(0,0,0,0.4)';
 
+    if ((radian.toFixed(2) <= 0.50)) {
+        controlY = graphCenter.y + controlPoints.y + (oneUnitPixel * maxPlots * (radian - 0));
+    } else if ((radian.toFixed(2) > 0.50) && (radian.toFixed(2) <= 1.00)) {
+        controlY = graphCenter.y + controlPoints.y + (oneUnitPixel * maxPlots * (1 - radian));
+    } else if ((radian.toFixed(2) > 1.00) && (radian.toFixed(2) <= 1.50)) {
+        controlY = graphCenter.y + controlPoints.y - (oneUnitPixel * maxPlots * (radian - 1));
+    } else {
+        controlY = graphCenter.y + controlPoints.y - (oneUnitPixel * maxPlots * (2 - radian));
+    }
+
     position = generate_ellipse_points(coneWidth, coneHeight, radian);
     context.beginPath();
     context.moveTo(graphCenter.x, graphCenter.y);
-    context.quadraticCurveTo(position.x, position.y, position.x, position.y);
+    context.quadraticCurveTo(controlPoints.x, controlY, position.x, position.y);
     context.setAttr('strokeStyle', color);
     context.setAttr('lineWidth', curveLineWidth);
     context.stroke();
@@ -162,7 +200,7 @@ function positionFrames() {
 }
 
 function animate() {
-    if (Math.floor(radian) === 2) {
+    if (radian.toFixed(2) == 2.00) {
         window.cancelAnimationFrame(id);
         radian = 0;
         return;
